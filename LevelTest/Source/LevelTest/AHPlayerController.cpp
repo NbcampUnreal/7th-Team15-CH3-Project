@@ -2,6 +2,7 @@
 #include"EnhancedInputSubsystems.h"
 #include"EnhancedInputComponent.h"
 #include"APlayerCharacter.h"
+#include"Blueprint/UserWidget.h"
 
 AAHPlayerController::AAHPlayerController() :
     InputMappingContext(nullptr),
@@ -15,7 +16,8 @@ AAHPlayerController::AAHPlayerController() :
     Slot2Action(nullptr),
     Slot3Action(nullptr),
     Slot4Action(nullptr),
-    InteractAction(nullptr)
+    InteractAction(nullptr),
+    ReloadAction(nullptr)
 {
 }
 

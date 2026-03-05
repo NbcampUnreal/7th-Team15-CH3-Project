@@ -13,6 +13,8 @@
 class USpringArmComponent;
 class UCameraComponent;
 class UCharacterStatusComponent;
+class UAHMainWidget;
+class APhasePostProcess;
 
 UCLASS()
 class LEVELTEST_API AAPlayerCharacter : public ACharacter , public ICombatInterface, public IGameplayTagAssetInterface, public IInteractInterface
@@ -22,8 +24,13 @@ class LEVELTEST_API AAPlayerCharacter : public ACharacter , public ICombatInterf
 public:
 	AAPlayerCharacter();
 
+	void UpdateVisualState();
+
 protected:
 	virtual void BeginPlay() override;
+
+	UPROPERTY()
+	APhasePostProcess* PostProcessHandler;
 
 public:	
 
@@ -84,6 +91,8 @@ public:
 
 public:
 
+	void UpdateCrosshairVisibility(bool bIsWeaponEquipped);
+
 	virtual void GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) const override { TagContainer = FactionTags; }
 
 
@@ -106,6 +115,7 @@ protected:
 	void OnSlot2();
 	void OnSlot3();
 	void OnSlot4();
+	void OnRealod();
 #pragma endregion
 
 //Interact Action
@@ -116,4 +126,18 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 	bool bIsAiming;
+
+public:
+	void ShowGameMessage(FString Message, bool bShow);
+
+	void UpdateAmmoUI(int32 CurrentAmmo, int32 SpareAmmo);
+
+	UAHMainWidget* GetMainWidget() const { return MainWidget; }
+protected:
+	UPROPERTY()
+	UAHMainWidget* MainWidget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montages")
+	UAnimMontage* DamagedMontage;
+
 };

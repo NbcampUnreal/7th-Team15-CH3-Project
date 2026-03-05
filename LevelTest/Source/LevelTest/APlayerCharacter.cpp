@@ -5,7 +5,10 @@
 #include"CharacterStatusComponent.h"
 #include"EnhancedInputComponent.h"
 #include"GameFramework/CharacterMovementComponent.h"
-
+#include"Kismet/GameplayStatics.h"
+#include "PhasePostProcess.h"
+#include "AHHUD.h"
+#include"AHMainWidget.h"
 
 AAPlayerCharacter::AAPlayerCharacter()
 {
@@ -27,18 +30,51 @@ AAPlayerCharacter::AAPlayerCharacter()
 	SprintSpeed = NormalSpeed * SprintSpeedMultiple;
 
 	GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
-
+	
 	CombatComp = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComp"));
+
 }
 
 void AAPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	if (!StatusComp)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("NO StatusCOmp Now"));
+		StatusComp = FindComponentByClass<UCharacterStatusComponent>();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("StatusCOmp Now"));
+	}
+
+	if (AAHPlayerController* PC = Cast<AAHPlayerController>(GetController()))
+	{
+		if (AAHHUD* HUD = PC->GetHUD<AAHHUD>())
+		{
+			MainWidget = HUD->GetMainWidget();
+		}
+	}
+
 	if (StatusComp)
 	{
 		StatusComp->OnDeath.AddDynamic(this, &AAPlayerCharacter::HandleDeath);
 	}
+	
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APhasePostProcess::StaticClass(), FoundActors);
+	// 월드에 있는 페이즈 포스트 프로세스 클래스들을 FoundActors Array에 저장,
+
+	if (FoundActors.Num() > 0)
+	{
+		PostProcessHandler = Cast<APhasePostProcess>(FoundActors[0]);
+	}
+	else 
+	{
+		UE_LOG(LogTemp, Error, TEXT("Fail: PostProcessHandler NOT Found in Level!"));
+	}
+	//복수의 페이즈포스트프로세스가 있다면 0순위를 핸들러로 사용한다
 }
 
 void AAPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -119,7 +155,7 @@ void AAPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		{
 			EIC->BindAction(
 				PC->Slot1Action,
-				ETriggerEvent::Triggered,
+				ETriggerEvent::Completed,
 				this,
 				&AAPlayerCharacter::OnSlot1
 			);
@@ -128,7 +164,7 @@ void AAPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		{
 			EIC->BindAction(
 				PC->Slot2Action,
-				ETriggerEvent::Triggered,
+				ETriggerEvent::Completed,
 				this,
 				&AAPlayerCharacter::OnSlot2
 			);
@@ -137,7 +173,7 @@ void AAPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		{
 			EIC->BindAction(
 				PC->Slot3Action,
-				ETriggerEvent::Triggered,
+				ETriggerEvent::Completed,
 				this,
 				&AAPlayerCharacter::OnSlot3
 			);
@@ -146,7 +182,7 @@ void AAPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		{
 			EIC->BindAction(
 				PC->Slot4Action,
-				ETriggerEvent::Triggered,
+				ETriggerEvent::Completed,
 				this,
 				&AAPlayerCharacter::OnSlot4
 			);
@@ -158,6 +194,15 @@ void AAPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 				ETriggerEvent::Triggered,
 				this,
 				&AAPlayerCharacter::ProcessInteract
+			);
+		}
+		if (PC->ReloadAction)
+		{
+			EIC->BindAction(
+				PC->ReloadAction,
+				ETriggerEvent::Completed,
+				this,
+				&AAPlayerCharacter::OnRealod
 			);
 		}
 	}
@@ -229,10 +274,12 @@ void AAPlayerCharacter::GetDamage(float DamageAmount)
 {
 	if (StatusComp)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("NO StatusCOmp Now"));
 		StatusComp->ApplyDamage(DamageAmount);
 
 		UE_LOG(LogTemp, Warning, TEXT("Player GetDamage Test! %f"), DamageAmount);
 	}
+	UpdateVisualState();
 
 }
 
@@ -276,6 +323,16 @@ void AAPlayerCharacter::OnSlot4()
 	if (CombatComp) CombatComp->SwitchWeapon(3);
 }
 
+void AAPlayerCharacter::OnRealod()
+{
+	if (CombatComp)
+	{
+		
+
+		CombatComp->Reload();
+	}
+}
+
 void AAPlayerCharacter::ProcessInteract()
 {
 	FVector Start = CameraComp->GetComponentLocation();
@@ -298,5 +355,38 @@ void AAPlayerCharacter::ProcessInteract()
 				if (Interactable) Interactable->Interact(this);
 			}
 		}
+	}
+}
+
+void AAPlayerCharacter::UpdateAmmoUI(int32 CurrentAmmo, int32 SpareAmmo)
+{
+	if (MainWidget)
+	{
+		MainWidget->UpdateAmmoDisplay(CurrentAmmo, SpareAmmo);
+	}
+}
+
+void AAPlayerCharacter::UpdateCrosshairVisibility(bool bIsWeaponEquipped)
+{
+	if (MainWidget)
+	{
+		MainWidget->SetCrosshairVisibility(bIsWeaponEquipped);
+	}
+}
+
+void AAPlayerCharacter::ShowGameMessage(FString Message, bool bShow)
+{
+	if (MainWidget)
+	{
+		MainWidget->DisplayNotice(Message, bShow);
+	}
+}
+
+void AAPlayerCharacter::UpdateVisualState()
+{
+	if (PostProcessHandler && StatusComp)
+	{
+		float HPPercent = StatusComp->CurrentHP / StatusComp->MaxHP;
+		PostProcessHandler->UpdateHealthVignette(HPPercent); // 
 	}
 }

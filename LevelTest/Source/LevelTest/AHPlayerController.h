@@ -56,6 +56,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input|Quickbar")
 	UInputAction* InteractAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input|Reload")
+	UInputAction* ReloadAction;
+
 #pragma endregion
 	virtual void BeginPlay() override;
 

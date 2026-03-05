@@ -50,6 +50,12 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Effects")
 	UParticleSystem* ImpactEffect;
 	// 탄착 이펙트 나아아중에
+
+	UPROPERTY(EditAnywhere, Category = "Effects")
+	USoundBase* EmptySound; // 탄약이 없을 때 재생할 소리
+
+	UPROPERTY(EditAnywhere, Category = "Effects")
+	USoundBase* ReloadSound; // 탄약이 없을 때 재생할 소리
 	
 	UPROPERTY(EditAnywhere, Category = "Debug")
 	bool bDrawDebugLine = true;
@@ -67,4 +73,14 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Effects")
 	UAnimMontage* FireMontage;
+
+	UPROPERTY(EditAnywhere, Category = "Ammo")
+	int32 MaxAmmo = 15; // 탄창 최대 용량
+
+	UPROPERTY(VisibleAnywhere, Category = "Ammo")
+	int32 CurrentAmmo; // 현재 탄창에 남은 총알
+
+public:
+	void PlayEmptySound();
+
 };

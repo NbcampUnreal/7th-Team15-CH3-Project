@@ -15,6 +15,8 @@ class LEVELTEST_API UCombatComponent : public UActorComponent
 public:
 	UCombatComponent();
 
+	void Reload();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -38,11 +40,37 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Combat")
 	ABaseWeapon* EquippedWeapon;
 
+	UFUNCTION(BlueprintCallable, Category = "Inventory|Quest")
+	void AddKey(FGameplayTag KeyTag);
+
+	UFUNCTION(BlueprintPure, Category = "Inventory|Quest")
+	bool HasKey(FGameplayTag KeyTag) const;
+
+	void RemoveKey(FGameplayTag KeyTag);
+
 private:
 	UPROPERTY()
 	AAPlayerCharacter* Character;
 
 	const int32 MaxSlots = 4;
 
+	int32 CurrentSlotIndex = -1;
+
 	void SpawnDefaultWeapon();
+
+	UPROPERTY()
+	TArray<int32> SlotAmmoCounts;
+
+	UPROPERTY(EditAnywhere, Category = "Combat|Ammo")
+	int32 SpareAmmo = 60;
+
+	bool bIsReloading = false;
+
+	void FinishReloading();
+
+	FTimerHandle ReloadTimerHandle;
+
+	UPROPERTY(VisibleAnywhere, Category = "Inventory|Quest")
+	TArray<FGameplayTag> OwnedKeys;
+
 };

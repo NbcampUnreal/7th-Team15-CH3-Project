@@ -114,3 +114,11 @@ void ABaseWeapon::Interact(AActor* Interactor)
         }
     }
 }
+
+void ABaseWeapon::PlayEmptySound()
+{
+    if (EmptySound)
+    {
+        UGameplayStatics::PlaySoundAtLocation(this, EmptySound, GetActorLocation());
+    }
+}

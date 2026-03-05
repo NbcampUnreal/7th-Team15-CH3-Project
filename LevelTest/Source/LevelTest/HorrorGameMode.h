@@ -4,8 +4,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "HorrorGameMode.generated.h"
 
-
-
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnGlobalPhaseChanged, int32 NewPhase);
 
 UCLASS()
 class LEVELTEST_API AHorrorGameMode : public AGameModeBase
@@ -18,13 +17,17 @@ public:
 
 	virtual void BeginPlay() override;
 
+	FOnGlobalPhaseChanged OnGlobalPhaseChanged;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GameProgress")
+	int32 CurrentPhase;
+
 #pragma region GameFlowLogic
 	void OnPlayerDeath(ACharacter* DeadPlayer);
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GameProgress")
-	int32 CurrentPhase;
 
+	void OnNoteProcessed(class AREADABLE* ReadNote);
 #pragma endregion
 
 };

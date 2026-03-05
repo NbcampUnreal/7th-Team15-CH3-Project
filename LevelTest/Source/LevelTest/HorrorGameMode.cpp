@@ -1,6 +1,8 @@
 ﻿#include "HorrorGameMode.h"
 #include"GameFramework/PlayerController.h"
 #include"GameFramework/Character.h"
+#include"READABLE.h"
+#include "EngineUtils.h"
 
 class HorrorSaveGame;
 
@@ -18,6 +20,10 @@ void AHorrorGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
+	for (TActorIterator<AREADABLE> It(GetWorld()); It; ++It)
+	{
+		It->OnNoteReadFinished.AddUObject(this, &AHorrorGameMode::OnNoteProcessed);
+	}
 }
 
 #pragma region GameFlowLogic
@@ -35,9 +41,14 @@ void AHorrorGameMode::OnPlayerDeath(ACharacter* DeadPlayer)
 		PC->bShowMouseCursor = true;
 		PC->SetInputMode(FInputModeUIOnly());
 	}
-
-	// 죽은 상태 UI 출력! 나아아아중에 작성해야핢!
 }
+
+void AHorrorGameMode::OnNoteProcessed(AREADABLE* ReadNote)
+{
+	CurrentPhase++; // 페이즈 변화,
+	OnGlobalPhaseChanged.Broadcast(CurrentPhase);
+}
+
 
 /*
 void AHorrorGameMode::SetStoryPhase(int32 NewPhase)

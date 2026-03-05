@@ -21,26 +21,14 @@ public class LevelTest : ModuleRules
 			"Slate",
             "NavigationSystem",
 			"GameplayTasks",
-			"GameplayTags"
+			"GameplayTags",
+			"SlateCore"
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });
 
 		PublicIncludePaths.AddRange(new string[] {
-			"LevelTest",
-			"LevelTest/Variant_Platforming",
-			"LevelTest/Variant_Platforming/Animation",
-			"LevelTest/Variant_Combat",
-			"LevelTest/Variant_Combat/AI",
-			"LevelTest/Variant_Combat/Animation",
-			"LevelTest/Variant_Combat/Gameplay",
-			"LevelTest/Variant_Combat/Interfaces",
-			"LevelTest/Variant_Combat/UI",
-			"LevelTest/Variant_SideScrolling",
-			"LevelTest/Variant_SideScrolling/AI",
-			"LevelTest/Variant_SideScrolling/Gameplay",
-			"LevelTest/Variant_SideScrolling/Interfaces",
-			"LevelTest/Variant_SideScrolling/UI"
+			"LevelTest"
 		});
 
 		// Uncomment if you are using Slate UI

@@ -25,6 +25,8 @@ protected:
 
 public:	
 
+	void Heal(float HP);
+
 #pragma region Character Stats
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite,Category = "Stats")

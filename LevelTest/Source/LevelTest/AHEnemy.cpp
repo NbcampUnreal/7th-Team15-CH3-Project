@@ -19,10 +19,23 @@ void AAHEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	if (!StatusComp)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AAHEnemy NO StatusCOmp Now"));
+		StatusComp = FindComponentByClass<UCharacterStatusComponent>();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AAHEnemy StatusCOmp Now"));
+	}
+
+
 	if (StatusComp)
 	{
 		StatusComp->OnDeath.AddDynamic(this, &AAHEnemy::HandleDeath);
 	}
+
+
 }
 
 void AAHEnemy::CheckHit()
@@ -41,7 +54,7 @@ void AAHEnemy::CheckHit()
 
 	bool bHit = GetWorld()->SweepSingleByChannel(
 		HitResult, Start, End, FQuat::Identity,
-		ECC_Pawn, FCollisionShape::MakeSphere(40.f),Params
+		ECC_Pawn, FCollisionShape::MakeSphere(40.f), Params
 	);
 
 	if (bHit)
@@ -52,11 +65,16 @@ void AAHEnemy::CheckHit()
 			CombatInterface->GetDamage(AttackDamage);
 		}
 	}
+
 }
 
 
 void AAHEnemy::GetDamage(float DamageAmount)
 {
+	if (DamagedMontage)
+	{
+		PlayAnimMontage(DamagedMontage);
+	}
 	if (StatusComp)
 	{
 		StatusComp->ApplyDamage(DamageAmount);

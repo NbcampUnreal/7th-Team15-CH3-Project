@@ -1,4 +1,5 @@
-﻿#pragma once
+﻿
+#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
@@ -28,14 +29,13 @@ class LEVELTEST_API AAHEnemy : public ACharacter, public ICombatInterface, publi
 public:
 	AAHEnemy();
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Status")
+	UCharacterStatusComponent* StatusComp;
 
 protected:
 	virtual void BeginPlay() override;
 
 protected:
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Status")
-	UCharacterStatusComponent* StatusComp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	float AttackDamage = 10.f;
@@ -113,7 +113,10 @@ public:
 	UAnimMontage* RageWakeMontage; // 레이지 상태로 돌입,
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montages")
-	UAnimMontage* GrabMontage; // 레이지 상태에서하는 특수공격 모션,
+	UAnimMontage* GrabMontage; // 레이지 상태에서하는 특수공격 모션;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montages")
+	UAnimMontage* DamagedMontage; // 아. 플레이어랑 공동으로 쓰게될 애니메이션이면 StatusComp에서 처리할걸 싶네
 
 	void PlayAttack();
 
