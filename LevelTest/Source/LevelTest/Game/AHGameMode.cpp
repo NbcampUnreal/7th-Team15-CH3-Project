@@ -1,16 +1,10 @@
 ﻿#include "AHGameMode.h"
 #include"GameFramework/PlayerController.h"
-#include"GameFramework/Character.h"
-#include"World/READABLE.h"
-#include "EngineUtils.h"
 
 class HorrorSaveGame;
 
 AAHGameMode::AAHGameMode()
 {
-	//DefaultPawnClass = APlayerCharacter::StaticClass();
-	//PlayerControllerClass = AHPlayerController::StaticClass();
-	//GameStateClass = AGameStateBase::StaticClass();
 
 	CurrentPhase = 0;
 }
@@ -19,16 +13,14 @@ AAHGameMode::AAHGameMode()
 void AAHGameMode::BeginPlay()
 {
 	Super::BeginPlay();
-
-	for (TActorIterator<AREADABLE> It(GetWorld()); It; ++It)
-	{
-		It->OnNoteReadFinished.AddUObject(this, &AAHGameMode::OnNoteProcessed);
-	}
+	
 }
 
-void AAHGameMode::OnPlayerDeath(ACharacter* DeadPlayer)
+
+/*
+*void AAHGameMode::OnPlayerDeath(ACharacter* DeadPlayer)
 {
-	if (!DeadPlayer) return;
+	if (DeadPlayer == nullptr) return;
 
 	UE_LOG(LogTemp, Error, TEXT("Player Dead Check"));
 
@@ -40,10 +32,6 @@ void AAHGameMode::OnPlayerDeath(ACharacter* DeadPlayer)
 		PC->SetInputMode(FInputModeUIOnly());
 	}
 }
-
-void AAHGameMode::OnNoteProcessed(AREADABLE* ReadNote)
-{
-	CurrentPhase++; // 페이즈 변화,
-	OnGlobalPhaseChanged.Broadcast(CurrentPhase);
-}
-
+ 서브시스템 이적 진행중
+ 
+ */

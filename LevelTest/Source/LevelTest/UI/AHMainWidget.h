@@ -13,6 +13,7 @@ class LEVELTEST_API UAHMainWidget : public UUserWidget
 	GENERATED_BODY()
     
 public:
+	
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void SetCrosshairVisibility(bool bVisible);
 
@@ -27,6 +28,8 @@ public:
 	void DisplayNotice(const FString& Content, bool bIsVisible);
 
 protected:
+	virtual void NativeConstruct() override;
+	
 	virtual void NativeTick(const FGeometry& MyGeometry, float DeltaSeconds) override;
 	
 	UPROPERTY(meta = (BindWidget))

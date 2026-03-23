@@ -2,6 +2,29 @@
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Subsystem/AHGameInstanceSubsystem.h"
+
+void UAHMainWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+	
+	if (UGameInstance* GI = GetGameInstance())
+	{
+		if (UAHGameInstanceSubsystem* Subsystem = GI->GetSubsystem<UAHGameInstanceSubsystem>())
+		{
+			Subsystem ->OnAmmoChanged.AddDynamic(this, &UAHMainWidget::UpdateAmmoDisplay);
+			
+			Subsystem -> OnHealthChanged.AddDynamic(this, &UAHMainWidget::UpdateHeartRate);
+			
+			/*
+			이후 더 추가해야할 것들...
+			
+			*/
+			
+		}
+	}
+}
+
 
 void UAHMainWidget::NativeTick(const FGeometry& MyGeometry, float DeltaSeconds)
 {

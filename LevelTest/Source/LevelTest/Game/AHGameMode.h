@@ -22,10 +22,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GameProgress")
 	int32 CurrentPhase;
 
-	void OnPlayerDeath(ACharacter* DeadPlayer);
-
 protected:
-
-	void OnNoteProcessed(class AREADABLE* ReadNote);
-
+// 서브시스템으로 옮겼다 
+	
 };
