@@ -29,7 +29,7 @@ void AAHBaseItem::Interact(AActor* Interactor)
 	UAHInventoryComponent* InventoryComp = Interactor->FindComponentByClass<UAHInventoryComponent>();
 	if (InventoryComp)
 	{
-		if (InventoryComp->AddItemToSlot(this->GetClass(),CurrentStackSize))
+		if (InventoryComp->AddItemToSlot(this->ItemData,CurrentStackSize))
 		{
 			Destroy();
 		}

@@ -1,5 +1,6 @@
 ﻿#include "Characters/Components/AHCharacterStatusComponent.h"
 #include "Characters/Player/AHPlayerCharacter.h" 
+#include "Subsystem/EventSubsystem.h"
 
 // --- Constructor & Lifecycle ---
 
@@ -30,10 +31,9 @@ void UAHCharacterStatusComponent::ApplyDamage(float DamageAmount)
 
 	if (FMath::IsNearlyZero(CurrentHP))
 	{
-		if (OnDeath.IsBound())
+		if (auto* EventSys = UEventSubsystem::Get(this))
 		{
-			OnDeath.Broadcast();
-			UE_LOG(LogTemp, Warning, TEXT("Character is Dead"));
+			EventSys->OnDeath.Broadcast();
 		}
 	}
 }

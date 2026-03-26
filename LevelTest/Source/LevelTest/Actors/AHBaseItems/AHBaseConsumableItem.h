@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Actors/AHBaseItem.h"
+#include "Actors/AHBaseItems/AHBaseItem.h"
 #include "AHBaseConsumableItem.generated.h"
 
 /**

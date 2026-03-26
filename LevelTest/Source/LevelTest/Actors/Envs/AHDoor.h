@@ -18,6 +18,8 @@ public:
 	virtual void Interact(AActor* Interactor) override;
 
 protected:
+	virtual void Tick(float DeltaSeconds) override;
+	
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	class UStaticMeshComponent* DoorMesh;
 
@@ -31,5 +33,6 @@ protected:
 	class USoundBase* LockedSound;
 
 	bool bIsOpened = false;
+	FRotator TargetRotation;
 
 };

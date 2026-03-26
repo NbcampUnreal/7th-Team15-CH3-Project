@@ -5,7 +5,6 @@
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
 #include "Characters/Components/AHCharacterStatusComponent.h"
-#include "Characters/Components/AHCombatComponent.h"
 #include "Interface/AHInteractInterface.h"
 #include "EnhancedInput/Public/InputAction.h"
 #include "AHPlayerCharacter.generated.h"
@@ -13,6 +12,10 @@
 class USpringArmComponent;
 class UCameraComponent;
 class UAHCharacterStatusComponent;
+class UAHInventoryComponent;
+class AAHBaseItem;
+class UAHItemData;
+
 
 UCLASS()
 class LEVELTEST_API AAHPlayerCharacter : public ACharacter,  public IAHInteractInterface, public IGenericTeamAgentInterface
@@ -31,14 +34,16 @@ public:
     void OnInputJump(const FInputActionInstance& InputActionInstance);
     void SprintStart(const FInputActionValue& Value);
     void SprintEnd(const FInputActionValue& Value);
-    void UpdateCrosshairVisibility(bool bIsWeaponEquipped);
-    void ShowGameMessage(FString Message, bool bShow);
-    void UpdateAmmoUI(int32 CurrentAmmo, int32 SpareAmmo);
+    //void UpdateCrosshairVisibility(bool bIsWeaponEquipped);
+  //  void ShowGameMessage(FString Message, bool bShow);
+//    void UpdateAmmoUI(int32 CurrentAmmo, int32 SpareAmmo);
     
 
    // UFUNCTION()
  //   void HandleDeath();
-
+    
+    void EquipItem(TSubclassOf<AAHBaseItem> ItemClass, int32 SlotIdex);
+    
     // --- Variables ---
     UPROPERTY(VisibleAnywhere, Category = "Camera")
     USpringArmComponent* SpringArmComp;
@@ -57,14 +62,18 @@ public:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
     float SprintSpeed;
-
+    
+    UPROPERTY(VisibleAnywhere, Category = "Inventory")
+    class UAHInventoryComponent* InventoryComp;
+    
 protected:
     // --- Functions ---
     virtual void BeginPlay() override;
     virtual void Interact(AActor* Interactor) override {};
     virtual void PostInitializeComponents() override;
 
-    void OnPrimeAction();
+    void StartPrimeAction();
+    void EndPrimeAction();
     void OnSecondAction(const FInputActionValue& Value);
     void OnSlot1();
     void OnSlot2();
@@ -72,10 +81,16 @@ protected:
     void OnSlot4();
     void OnReload();
     void ProcessInteract();
+    
+    void HandleEquipRequest(UAHItemData* ItemData, int32 SlotIndex);
+    
+    void ExecuteEquip(UAHItemData* ItemData, int32 SlotIndex);
+    void UnequipCurrentItem();
 
     // --- Variables ---
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
-    UAHCombatComponent* CombatComp;
+    
+    UPROPERTY(VisibleAnywhere, Category = "Combat")
+    class AAHBaseItem* EquippedItem;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interact")
     float InteractRange = 400.f;
@@ -87,5 +102,7 @@ protected:
     bool bIsAiming;
     
     float OriginalWalkSpeed;
+    
+    int32 CurrentSlotIndex = -1;
 private:
 };

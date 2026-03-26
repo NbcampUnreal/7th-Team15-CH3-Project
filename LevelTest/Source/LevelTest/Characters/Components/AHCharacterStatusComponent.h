@@ -4,8 +4,6 @@
 #include "Components/ActorComponent.h"
 #include "AHCharacterStatusComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeathDelegate);
-
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class LEVELTEST_API UAHCharacterStatusComponent : public UActorComponent
 {
@@ -18,9 +16,6 @@ public:
 	void Heal(float HP);
 	void ResetHealth();
 	
-	UPROPERTY(BlueprintAssignable, Category = "Events")
-	FOnDeathDelegate OnDeath;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
 	float MaxHP = 100.f;
 

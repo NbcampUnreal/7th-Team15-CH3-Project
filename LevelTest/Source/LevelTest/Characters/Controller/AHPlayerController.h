@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "UI/AHMainWidget.h"
 #include "AHPlayerController.generated.h"
 
 class UInputMappingContext;
@@ -34,7 +35,10 @@ public:
 	UInputAction* SprintAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input|Combat")
-	UInputAction* PrimeAction;
+	UInputAction* StartPrimeAction;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input|Combat")
+	UInputAction* EndPrimeAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input|Combat")
 	UInputAction* SecondAction;
@@ -57,6 +61,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input|Reload")
 	UInputAction* ReloadAction;
 	
+	
+protected:
 	virtual void BeginPlay() override;
+	
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UAHMainWidget> MainWidgetClass;
+	
+	UPROPERTY()
+	UAHMainWidget* MainWidgetInstance;
 
 };

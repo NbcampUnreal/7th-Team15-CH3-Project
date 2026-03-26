@@ -1,10 +1,22 @@
-#include "Actors/AHBaseRangeItem.h"
+#include "Actors/AHBaseItems/AHBaseRangeItem.h"
+
+#include "Characters/Common/AHBaseCharacter.h"
 #include "Characters/Player/AHPlayerCharacter.h"
+#include "Engine/DamageEvents.h"
+#include "Subsystem/EventSubsystem.h"
 
 void AAHBaseRangeItem::StartPrimeAction()
 {
-	
-	Fire();
+	if (CurrentAmmo > 0)
+	{
+		Fire();
+		CurrentAmmo--;	
+		if (auto* EventSys = UEventSubsystem::Get(this))
+		{
+			EventSys->OnAmmoChanged.Broadcast(CurrentAmmo, MaxAmmo); 
+			//MaxAmmo를 어디서 구현해야할지 고민, 이벤트서브시스템이냐 플레이어컨트롤러냐 
+		}
+	}	
 }
 
 
@@ -26,21 +38,22 @@ void AAHBaseRangeItem::Fire()
 		
 		bool bHit = GetWorld()->LineTraceSingleByChannel(Hit,CameraLoc,TraceEnd,ECC_Visibility,Params);
 			
-		DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1.0f, 0, 1.0f);
+		DrawDebugLine(GetWorld(), CameraLoc, TraceEnd, FColor::Red, false, 1.0f, 0, 1.0f);
 		
 		// 발사 이펙트
-		
 		if (bHit)
 		{
 			// 이펙트
 		}
 		
 		AActor* HitActor = Hit.GetActor();
-		if (UAHCharacterStatusComponent* HitComp = Cast<UAHCharacterStatusComponent>(HitActor))
+		if (HitActor)
 		{
-			if (HitComp)
+			AAHBaseCharacter* HitCharacter = Cast<AAHBaseCharacter>(HitActor);
+			if (HitCharacter != nullptr)
 			{
-				HitComp->ApplyDamage(Damage);
+				FDamageEvent GenericDamageEvent;
+				HitCharacter->TakeDamage(Damage, GenericDamageEvent, PlayerCharacter->GetController(),this);
 			}
 		}
 	}

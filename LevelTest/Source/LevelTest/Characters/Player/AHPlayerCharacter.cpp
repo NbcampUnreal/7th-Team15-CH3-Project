@@ -4,8 +4,11 @@
 #include"Camera/CameraComponent.h"
 #include"Characters/Components/AHCharacterStatusComponent.h"
 #include"EnhancedInputComponent.h"
+#include "Actors/AHBaseItems/AHBaseItem.h"
+#include "Characters/Components/AHInventoryComponent.h"
 #include"GameFramework/CharacterMovementComponent.h"
-#include "Subsystem/AHGameInstanceSubsystem.h"
+#include "Subsystem/EventSubsystem.h"
+#include "AHItemData.h"
 
 AAHPlayerCharacter::AAHPlayerCharacter()
 {
@@ -19,16 +22,19 @@ AAHPlayerCharacter::AAHPlayerCharacter()
 	CameraComp->SetupAttachment(SpringArmComp);
 
 	StatusComp = CreateDefaultSubobject<UAHCharacterStatusComponent>(TEXT("StatusComp"));
+	InventoryComp = CreateDefaultSubobject<UAHInventoryComponent>(TEXT("InventoryComp"));
 
 	GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
 	
-	CombatComp = CreateDefaultSubobject<UAHCombatComponent>(TEXT("CombatComp"));
-
 }
 
 void AAHPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	if (UEventSubsystem* Eventsys = UEventSubsystem::Get(this))
+	{
+		Eventsys->OnEquipRequest.AddDynamic(this, &AAHPlayerCharacter::HandleEquipRequest);
+	}
 }
 
 void AAHPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -62,14 +68,14 @@ void AAHPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 			EIC->BindAction(PC->SprintAction,ETriggerEvent::Completed,this,&AAHPlayerCharacter::SprintEnd);
 		}
-		if (PC->PrimeAction)
+		if (PC->StartPrimeAction)
 		{
-			EIC->BindAction(PC->PrimeAction,ETriggerEvent::Completed,this,&AAHPlayerCharacter::OnPrimeAction);
+			EIC->BindAction(PC->EndPrimeAction,ETriggerEvent::Completed,this,&AAHPlayerCharacter::EndPrimeAction);
+			EIC->BindAction(PC->StartPrimeAction, ETriggerEvent::Started, this, &AAHPlayerCharacter::StartPrimeAction);
 		}
 		if (PC->SecondAction)
 		{
-			EIC->BindAction(PC->SecondAction,ETriggerEvent::Triggered,this,&AAHPlayerCharacter::OnSecondAction);
-			EIC->BindAction(PC->SecondAction,ETriggerEvent::Completed,this,&AAHPlayerCharacter::OnSecondAction);
+			EIC->BindAction(PC->SecondAction,ETriggerEvent::Started,this,&AAHPlayerCharacter::OnSecondAction);
 		}
 		if (PC->Slot1Action)
 		{
@@ -177,61 +183,72 @@ void AAHPlayerCharacter::PostInitializeComponents()
 	}
 }
 
-void AAHPlayerCharacter::OnPrimeAction()
+void AAHPlayerCharacter::EndPrimeAction()
 {
-	if (CombatComp)
+	if (EquippedItem == nullptr)
 	{
-		CombatComp->ProcessPrimaryAction();
+		return;
 	}
+	EquippedItem->EndPrimeAction();
+}
+
+void AAHPlayerCharacter::StartPrimeAction()
+{
+	if (EquippedItem == nullptr)
+	{
+		return;
+	}
+	EquippedItem->StartPrimeAction();
 }
 
 void AAHPlayerCharacter::OnSecondAction(const FInputActionValue& Value)
 {
-	bIsAiming = Value.Get<bool>();
-	if (CombatComp)
+	if (EquippedItem == nullptr)
 	{
-		CombatComp->ProcessSecondaryAction(Value.Get<bool>());
+		return;
 	}
+	EquippedItem->StartSecondaryAction();
 }
 
 void AAHPlayerCharacter::OnSlot1()
 {
-	if (CombatComp)
+	if (InventoryComp)
 	{
-		CombatComp->SwitchWeapon(0);
+		InventoryComp->RequestEquipByIndex(1);
 	}
 }
 
 void AAHPlayerCharacter::OnSlot2()
 {
-	if (CombatComp)
+	if (InventoryComp)
 	{
-		CombatComp->SwitchWeapon(1);
+		InventoryComp->RequestEquipByIndex(2);
 	}
 }
 
 void AAHPlayerCharacter::OnSlot3()
 {
-	if (CombatComp)
+	if (InventoryComp)
 	{
-		CombatComp->SwitchWeapon(2);
+		InventoryComp->RequestEquipByIndex(3);
 	}
 }
 
 void AAHPlayerCharacter::OnSlot4()
 {
-	if (CombatComp)
-	{ 
-		CombatComp->SwitchWeapon(3);
+	if (InventoryComp)
+	{
+		InventoryComp->RequestEquipByIndex(4);
 	}
 }
 
 void AAHPlayerCharacter::OnReload()
 {
-	if (CombatComp)
+	if (EquippedItem == nullptr)
 	{
-		CombatComp->Reload();
+		return;
 	}
+	//EquippedItem->Reload()
 }
 
 void AAHPlayerCharacter::ProcessInteract()
@@ -259,9 +276,59 @@ void AAHPlayerCharacter::ProcessInteract()
 	}
 }
 
+void AAHPlayerCharacter::HandleEquipRequest(UAHItemData* ItemData, int32 SlotIndex)
+{
+	if (ItemData == nullptr)
+	{
+		return;
+	}
+	if (CurrentSlotIndex == SlotIndex)
+	{
+		UnequipCurrentItem();
+		return;
+	}
+	if (EquippedItem)
+	{
+		UnequipCurrentItem();
+	}
+	ExecuteEquip(ItemData, SlotIndex);
+}
+
+void AAHPlayerCharacter::ExecuteEquip(UAHItemData* ItemData, int32 SlotIndex)
+{
+	if (ItemData == nullptr || ItemData->ItemClass == nullptr)
+	{
+		return;
+	}
+	FActorSpawnParameters Params;
+	Params.Owner = this;
+	Params.Instigator = this;
+	
+	EquippedItem = GetWorld()->SpawnActor<AAHBaseItem>(ItemData->ItemClass, Params);
+	if (EquippedItem)
+	{
+		//SnapToTargetIncludingScale: 아이템의 현재 위치를 무시하고, 부착될 대상(소켓)의 위치와 회전값에 딱 붙인다.
+		//FName("HandGrip_R") 소켓 지정
+		EquippedItem->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale,FName("HandGrip_R"));
+		
+		CurrentSlotIndex = SlotIndex;
+	}
+}
+
+void AAHPlayerCharacter::UnequipCurrentItem()
+{
+	if (EquippedItem)
+	{
+		EquippedItem->Destroy();
+		EquippedItem = nullptr;
+	}
+	CurrentSlotIndex = -1;
+}
+
+/*
 void AAHPlayerCharacter::UpdateAmmoUI(int32 CurrentAmmo, int32 SpareAmmo)
 {
-	if (UAHGameInstanceSubsystem* GameInstance = GetGameInstance()->GetSubsystem<UAHGameInstanceSubsystem>())
+	if (UEventSubsystem* GameInstance = GetGameInstance()->GetSubsystem<UEventSubsystem>())
 	{
 		GameInstance->OnAmmoChanged.Broadcast(CurrentAmmo,SpareAmmo);
 	}
@@ -269,7 +336,7 @@ void AAHPlayerCharacter::UpdateAmmoUI(int32 CurrentAmmo, int32 SpareAmmo)
 
 void AAHPlayerCharacter::UpdateCrosshairVisibility(bool bIsWeaponEquipped)
 {
-	if (UAHGameInstanceSubsystem* GameInstance = GetGameInstance()->GetSubsystem<UAHGameInstanceSubsystem>())
+	if (UEventSubsystem* GameInstance = GetGameInstance()->GetSubsystem<UEventSubsystem>())
 	{
 		//GameInstance-> On~~  이게 캐릭터에 있는게 맞나?
 		// 무기에 붙이는게 맞지 않나?
@@ -278,8 +345,9 @@ void AAHPlayerCharacter::UpdateCrosshairVisibility(bool bIsWeaponEquipped)
 
 void AAHPlayerCharacter::ShowGameMessage(FString Message, bool bShow)
 {
-	if (UAHGameInstanceSubsystem* GameInstance = GetGameInstance()->GetSubsystem<UAHGameInstanceSubsystem>())
+	if (UEventSubsystem* GameInstance = GetGameInstance()->GetSubsystem<UEventSubsystem>())
 	{
 		GameInstance->OnDisplay.Broadcast(Message,bShow);
 	}
 }
+*/

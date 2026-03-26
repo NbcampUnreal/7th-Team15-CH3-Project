@@ -22,10 +22,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void UpdateCrosshairSpread(float SpreadAmount);
-
+	
+	UFUNCTION(BlueprintCallable, Category = "UI")
 	void UpdateAmmoDisplay(int32 CurrentAmmo, int32 SpareAmmo);
-
-	void DisplayNotice(const FString& Content, bool bIsVisible);
+	
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void DisplayNotice(FString Content, bool bIsVisible);
 
 protected:
 	virtual void NativeConstruct() override;

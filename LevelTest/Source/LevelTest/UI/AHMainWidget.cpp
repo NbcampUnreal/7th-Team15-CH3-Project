@@ -2,7 +2,7 @@
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Materials/MaterialInstanceDynamic.h"
-#include "Subsystem/AHGameInstanceSubsystem.h"
+#include "Subsystem/EventSubsystem.h"
 
 void UAHMainWidget::NativeConstruct()
 {
@@ -10,11 +10,14 @@ void UAHMainWidget::NativeConstruct()
 	
 	if (UGameInstance* GI = GetGameInstance())
 	{
-		if (UAHGameInstanceSubsystem* Subsystem = GI->GetSubsystem<UAHGameInstanceSubsystem>())
+		if (UEventSubsystem* Subsystem = GI->GetSubsystem<UEventSubsystem>())
 		{
 			Subsystem ->OnAmmoChanged.AddDynamic(this, &UAHMainWidget::UpdateAmmoDisplay);
 			
 			Subsystem -> OnHealthChanged.AddDynamic(this, &UAHMainWidget::UpdateHeartRate);
+			
+			Subsystem ->OnDisplay.AddDynamic(this, &UAHMainWidget::DisplayNotice);
+			
 			
 			/*
 			이후 더 추가해야할 것들...
@@ -97,7 +100,7 @@ void UAHMainWidget::UpdateAmmoDisplay(int32 CurrentAmmo, int32 SpareAmmo)
 		SpareAmmoText->SetText(FText::AsNumber(SpareAmmo));
 }
 
-void UAHMainWidget::DisplayNotice(const FString& Content, bool bIsvisible)
+void UAHMainWidget::DisplayNotice(FString Content, bool bIsvisible)
 {
 	if (NoteText)
 	{

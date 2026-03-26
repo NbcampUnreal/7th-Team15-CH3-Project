@@ -25,13 +25,6 @@ public:
 	virtual void StartSecondaryAction();
 	virtual void EndSecondaryAction();
 	
-	//variables
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Setting")
-	FGameplayTag ItemTag; // 아이템 형식을 입력하기 위한 태그(무기, 회복, 키 등)
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Setting")
-	FString ItemName;
-	
 protected:
 	virtual void BeginPlay() override;
 	
@@ -45,5 +38,14 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Setting")
 	int32 CurrentStackSize = 1;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Setting")
+	FGameplayTag ItemTag; // 아이템 형식을 입력하기 위한 태그(무기, 회복, 키 등)
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Setting")
+	FString ItemName;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
+	class UAHItemData* ItemData;
 
 };

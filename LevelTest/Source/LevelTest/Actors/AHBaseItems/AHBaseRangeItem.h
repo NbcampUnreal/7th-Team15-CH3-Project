@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Actors/AHBaseItem.h"
+#include "Actors/AHBaseItems/AHBaseItem.h"
 #include "AHBaseRangeItem.generated.h"
 
 class USoundBase;
@@ -18,7 +18,7 @@ public:
 	int32 CurrentAmmo = 15;
 	
 protected:
-	void Fire(const FVector& Location, const FRotator& Rotation);
+	void Fire();
 	
 	void PlayEmptySound();
 	

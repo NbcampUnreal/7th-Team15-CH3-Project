@@ -8,7 +8,7 @@ AAHPlayerController::AAHPlayerController() :
     LookAction(nullptr),
     JumpAction(nullptr),
     SprintAction(nullptr),
-    PrimeAction(nullptr),
+    StartPrimeAction(nullptr),
     SecondAction(nullptr),
     Slot1Action(nullptr), 
     Slot2Action(nullptr),
@@ -34,6 +34,15 @@ void AAHPlayerController::BeginPlay()
             }
         }
     }
+    if (MainWidgetClass)
+    {
+        MainWidgetInstance = CreateWidget<UAHMainWidget>(this, MainWidgetClass);
+        if (MainWidgetInstance)
+        {
+            MainWidgetInstance->AddToViewport();   
+        }
+    }
+
 }
 
 
